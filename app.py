@@ -67,7 +67,7 @@ class MoviesView(Resource):
             all_movies = all_movies.filter(Movie.genre_id == genre_id)
 
         movies = all_movies.paginate(page, per_page=3)
-        return movies_schema.dumps(movies.items), 200
+        return movies_schema.dump(movies.items), 200
 
     def post(self):
         request_json = request.json
@@ -89,7 +89,7 @@ class MovieView(Resource):
         return movie_schema.dump(movie), 200
 
     def put(self, mid: int):
-        update_row = db.session.query().filter(Movie.id == mid).update(request.json)
+        update_row = db.session.query(Movie).filter(Movie.id == mid).update(request.json)
 
         if update_row != 1:
             return "", 404
@@ -101,10 +101,10 @@ class MovieView(Resource):
     def delete(self, mid: int):
         delete_rows = db.session.query(Movie).get(mid)
 
-        if delete_rows != 1:
+        if not delete_rows:
             return "", 404
 
-        db.session.delete()
+        db.session.delete(delete_rows)
         db.session.commit()
 
         return "", 204
